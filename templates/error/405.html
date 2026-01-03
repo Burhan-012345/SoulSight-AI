@@ -1,0 +1,49 @@
+{% extends "base.html" %} {% block title %}Method Not Allowed (405) - SoulSight
+AI{% endblock %} {% block content %}
+<div class="error-container error-405">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-times-circle"></i>
+    </div>
+
+    <h1>405</h1>
+    <h2>Method Not Allowed</h2>
+
+    <div class="error-description">
+      <p>The request method is not supported for the requested resource.</p>
+      <p>
+        For example, you might be trying to POST to a page that only accepts GET
+        requests.
+      </p>
+
+      <div class="error-technical">
+        <p><strong>Request Method:</strong> {{ request.method }}</p>
+        <p>
+          <strong>Allowed Methods:</strong> GET, POST, DELETE (varies by
+          endpoint)
+        </p>
+      </div>
+    </div>
+
+    <div class="error-actions">
+      <a href="{{ url_for('index') }}" class="btn-error">
+        <i class="fas fa-home"></i> Go to Homepage
+      </a>
+      <a href="javascript:history.back()" class="btn-error-secondary">
+        <i class="fas fa-arrow-left"></i> Return to Previous Page
+      </a>
+    </div>
+
+    <div class="error-help">
+      <p>
+        If you're a developer integrating with our API, please check the API
+        documentation.
+      </p>
+      <p>
+        For assistance, contact
+        <a href="mailto:api-support@soulsight.ai">API Support</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

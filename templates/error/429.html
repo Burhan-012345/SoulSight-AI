@@ -1,0 +1,92 @@
+{% extends "base.html" %} {% block title %}Too Many Requests (429) - SoulSight
+AI{% endblock %} {% block content %}
+<div class="error-container error-429">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-tachometer-alt"></i>
+    </div>
+
+    <h1>429</h1>
+    <h2>Too Many Requests</h2>
+
+    <div class="error-description">
+      <p>You've sent too many requests in a given amount of time.</p>
+      <p>
+        To ensure fair usage for all our users, we limit the number of requests
+        you can make.
+      </p>
+
+      <div class="rate-limit-info">
+        <h3>Rate Limits:</h3>
+        <ul>
+          <li><strong>Uploads:</strong> 10 per minute</li>
+          <li><strong>AI Processing:</strong> 20 per minute</li>
+          <li><strong>Text-to-Speech:</strong> 30 per minute</li>
+          <li><strong>General:</strong> 100 per hour</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="error-actions">
+      <button
+        onclick="location.reload()"
+        class="btn-error"
+        id="retryButton"
+        disabled
+      >
+        <i class="fas fa-clock"></i> Try Again in
+        <span id="countdown">60</span>s
+      </button>
+      <a
+        href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}"
+        class="btn-error-secondary"
+      >
+        <i class="fas fa-arrow-left"></i> Return to Dashboard
+      </a>
+    </div>
+
+    <div class="error-tips">
+      <h3>Tips to avoid rate limits:</h3>
+      <ul>
+        <li>Wait between uploads and processing</li>
+        <li>Use the batch processing feature for multiple images</li>
+        <li>Save your favorite results to revisit later</li>
+        <li>Upgrade to Premium for higher limits (coming soon)</li>
+      </ul>
+    </div>
+
+    <div class="error-help">
+      <p>
+        Need higher limits for your use case?
+        <a href="mailto:support@soulsight.ai?subject=Rate Limit Inquiry"
+          >Contact us about enterprise plans</a
+        >
+      </p>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const countdownElement = document.getElementById("countdown");
+    const retryButton = document.getElementById("retryButton");
+    let timeLeft = 60;
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      countdownElement.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        countdownElement.parentElement.innerHTML =
+          '<i class="fas fa-redo"></i> Try Again';
+        retryButton.disabled = false;
+        retryButton.onclick = function () {
+          location.reload();
+        };
+      }
+    }, 1000);
+  });
+</script>
+{% endblock %} {% endblock %}

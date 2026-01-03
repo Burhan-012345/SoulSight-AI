@@ -1,0 +1,83 @@
+{% extends "base.html" %} {% block title %}Service Unavailable (503) - SoulSight
+AI{% endblock %} {% block content %}
+<div class="error-container error-503">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-tools"></i>
+    </div>
+
+    <h1>503</h1>
+    <h2>Service Unavailable</h2>
+
+    <div class="error-description">
+      <p>
+        SoulSight AI is currently undergoing maintenance or is temporarily
+        unavailable.
+      </p>
+      <p>
+        We're working hard to improve your experience and should be back online
+        shortly.
+      </p>
+
+      <div class="maintenance-info">
+        <h3>Scheduled Maintenance</h3>
+        <p><strong>Start:</strong> Today, 02:00 UTC</p>
+        <p><strong>Estimated Completion:</strong> Today, 04:00 UTC</p>
+        <p>
+          <strong>Reason:</strong> Database optimization and performance
+          improvements
+        </p>
+      </div>
+    </div>
+
+    <div class="error-actions">
+      <button onclick="location.reload()" class="btn-error">
+        <i class="fas fa-sync-alt"></i> Check Status
+      </button>
+      <a
+        href="https://status.soulsight.ai"
+        class="btn-error-secondary"
+        target="_blank"
+      >
+        <i class="fas fa-chart-line"></i> Status Page
+      </a>
+    </div>
+
+    <div class="error-updates">
+      <h3>Latest Updates</h3>
+      <div class="updates-list">
+        <div class="update-item">
+          <span class="update-time">02:15 UTC</span>
+          <span class="update-text"
+            >Maintenance has begun. All services are temporarily offline.</span
+          >
+        </div>
+        <div class="update-item">
+          <span class="update-time">01:45 UTC</span>
+          <span class="update-text"
+            >Maintenance notification sent to all users.</span
+          >
+        </div>
+        <div class="update-item">
+          <span class="update-time">Yesterday, 18:00 UTC</span>
+          <span class="update-text"
+            >Maintenance scheduled to improve processing speed by 40%.</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="error-help">
+      <p>
+        Follow us on <a href="https://twitter.com/soulsightai">Twitter</a> for
+        real-time updates
+      </p>
+      <p>
+        Email us at
+        <a href="mailto:support@soulsight.ai">support@soulsight.ai</a> for
+        urgent inquiries
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

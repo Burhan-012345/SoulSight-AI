@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block title %}Unauthorized (401) - SoulSight AI{%
+endblock %} {% block content %}
+<div class="error-container error-401">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-user-lock"></i>
+    </div>
+
+    <h1>401</h1>
+    <h2>Unauthorized Access</h2>
+
+    <div class="error-description">
+      <p>You need to be authenticated to access this resource.</p>
+      <p>
+        This page requires valid login credentials that were either not provided
+        or are invalid.
+      </p>
+    </div>
+
+    <div class="error-actions">
+      <a href="{{ url_for('login') }}" class="btn-error">
+        <i class="fas fa-sign-in-alt"></i> Login with Google
+      </a>
+      <a href="{{ url_for('index') }}" class="btn-error-secondary">
+        <i class="fas fa-home"></i> Go to Homepage
+      </a>
+    </div>
+
+    <div class="error-help">
+      <p>
+        Don't have an account?
+        <a href="{{ url_for('login') }}">Sign up for free</a>
+      </p>
+      <p>
+        Forgot what you were looking for?
+        <a
+          href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('index') }}"
+          >Browse featured insights</a
+        >
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

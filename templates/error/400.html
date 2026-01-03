@@ -1,0 +1,51 @@
+{% extends "base.html" %} {% block title %}Bad Request (400) - SoulSight AI{%
+endblock %} {% block content %}
+<div class="error-container error-400">
+  <div class="error-card">
+    <div class="error-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+
+    <h1>400</h1>
+    <h2>Bad Request</h2>
+
+    <div class="error-description">
+      <p>
+        Your request contains incorrect syntax or cannot be processed by our
+        servers.
+      </p>
+      <p class="error-details">This might be due to:</p>
+      <ul class="error-list">
+        <li>Malformed request syntax</li>
+        <li>Invalid request message framing</li>
+        <li>Deceptive request routing</li>
+        <li>Size of request exceeds server limits</li>
+      </ul>
+    </div>
+
+    <div class="error-actions">
+      <a href="{{ url_for('index') }}" class="btn-error">
+        <i class="fas fa-home"></i> Back to Home
+      </a>
+      <a href="javascript:history.back()" class="btn-error-secondary">
+        <i class="fas fa-arrow-left"></i> Go Back
+      </a>
+      <button onclick="location.reload()" class="btn-error-secondary">
+        <i class="fas fa-redo"></i> Reload Page
+      </button>
+    </div>
+
+    <div class="error-help">
+      <p>
+        If the problem persists, please
+        <a href="mailto:support@soulsight.ai?subject=400 Bad Request Error"
+          >contact our support team</a
+        >
+      </p>
+      <p class="error-timestamp">
+        Error ID: {{ request.environ.get('REQUEST_ID', 'N/A') }}
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
