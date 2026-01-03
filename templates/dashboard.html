@@ -1,0 +1,613 @@
+{% extends "base.html" %} {% block title %}Dashboard - SoulSight AI{% endblock
+%} {% block extra_css %}
+<style>
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 1024px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="dashboard-header">
+  <h1><i class="fas fa-tachometer-alt"></i> Your Dashboard</h1>
+  <p>Welcome back, {{ current_user.name }}! Ready to discover more insights?</p>
+  <div class="dashboard-actions">
+    <a href="{{ url_for('history') }}" class="btn btn-secondary">
+      <i class="fas fa-history"></i> View Full History
+    </a>
+    {% if current_user.is_admin %}
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-admin">
+      <i class="fas fa-shield-alt"></i> Admin Panel
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <!-- Left Sidebar -->
+  <div class="sidebar">
+    <!-- Upload Section -->
+    <div class="upload-section">
+      <h3><i class="fas fa-cloud-upload-alt"></i> Upload Image</h3>
+      <div class="upload-zone" id="uploadZone">
+        <i class="fas fa-image"></i>
+        <p>Drag & drop your image here</p>
+        <p class="upload-hint">or click to browse</p>
+        <input
+          type="file"
+          id="imageUpload"
+          accept=".jpg,.jpeg,.png,.gif"
+          hidden
+        />
+      </div>
+      <div class="upload-info">
+        <p><i class="fas fa-info-circle"></i> Supports JPG, PNG up to 16MB</p>
+      </div>
+    </div>
+
+    <!-- Processing Controls -->
+    <div class="controls-section">
+      <h3><i class="fas fa-sliders-h"></i> AI Settings</h3>
+
+      <div class="control-group">
+        <label for="aiMode">AI Mode</label>
+        <select id="aiMode" class="form-select">
+          <option value="detailed_description">Detailed Description</option>
+          <option value="caption">Image Caption</option>
+          <option value="educational">Educational Explanation</option>
+          <option value="creative_story">Creative Story / Poem</option>
+          <option value="keywords">Keywords / Tags</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="customPrompt">Custom Prompt (Optional)</label>
+        <textarea
+          id="customPrompt"
+          class="form-textarea"
+          placeholder="Ask specific questions or give special instructions..."
+        ></textarea>
+      </div>
+
+      <div class="control-group">
+        <label for="tone">Tone</label>
+        <select id="tone" class="form-select">
+          <option value="neutral">Neutral</option>
+          <option value="formal">Formal</option>
+          <option value="casual">Casual</option>
+          <option value="romantic">Romantic</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="length">Output Length</label>
+        <select id="length" class="form-select">
+          <option value="short">Short</option>
+          <option value="medium">Medium</option>
+          <option value="long">Long</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label for="language">Language</label>
+        <select id="language" class="form-select">
+          <option value="en">English</option>
+          <option value="hi">Hindi</option>
+          <option value="ur">Urdu</option>
+        </select>
+      </div>
+
+      <button id="processBtn" class="btn-process" disabled>
+        <i class="fas fa-magic"></i> Generate AI Insights
+      </button>
+      <button id="regenerateBtn" class="btn-regenerate" style="display: none">
+        <i class="fas fa-redo"></i> Regenerate
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Current Session -->
+    <div class="session-section">
+      <div class="before-after">
+        <!-- Image Preview -->
+        <div class="image-panel">
+          <div id="imagePreview" class="preview-placeholder">
+            <i class="fas fa-image"></i>
+            <p>Your image will appear here</p>
+          </div>
+          <div id="imageInfo" class="image-info" style="display: none">
+            <span id="imageCategory" class="category-badge"></span>
+            <span id="imageSize" class="size-info"></span>
+          </div>
+        </div>
+
+        <!-- AI Output -->
+        <div class="output-panel">
+          <div class="output-header">
+            <h3><i class="fas fa-brain"></i> AI Insights</h3>
+            <div
+              class="output-actions"
+              id="outputActions"
+              style="display: none"
+            >
+              <button
+                id="favoriteBtn"
+                class="btn-icon"
+                title="Add to Favorites"
+              >
+                <i class="far fa-star"></i>
+              </button>
+              <button id="speakBtn" class="btn-icon" title="Text to Speech">
+                <i class="fas fa-volume-up"></i>
+              </button>
+              <button id="exportBtn" class="btn-icon" title="Export">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="output-body">
+            <div id="loading" class="loading" style="display: none">
+              <div class="spinner"></div>
+              <p>SoulSight AI is reading the soul of your image...</p>
+            </div>
+
+            <div id="outputContent" class="output-content">
+              <div class="empty-state">
+                <i class="fas fa-robot"></i>
+                <p>Upload an image and click "Generate AI Insights" to begin</p>
+              </div>
+            </div>
+
+            <div
+              id="confidenceIndicator"
+              class="confidence-indicator"
+              style="display: none"
+            >
+              <span class="confidence-label">AI Confidence:</span>
+              <span id="confidenceBadge" class="confidence-badge"></span>
+              <span id="processingTime" class="time-info"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Favorites Section -->
+    <div class="favorites-section">
+      <div class="section-header">
+        <h3><i class="fas fa-star"></i> Your Favorites</h3>
+        <a href="{{ url_for('history') }}" class="btn-view-all">
+          View All <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      {% if favorites %}
+      <div class="favorites-grid">
+        {% for fav in favorites[:4] %} {% set result = fav.ai_result %} {% set
+        image = result.image %}
+        <div class="favorite-card" data-result-id="{{ result.id }}">
+          <div class="favorite-preview">
+            <img
+              src="{{ url_for('static', filename='uploads/' + image.filename) }}"
+              alt="{{ image.original_filename }}"
+              loading="lazy"
+            />
+          </div>
+          <div class="favorite-details">
+            <h4>{{ result.mode|replace('_', ' ')|title }}</h4>
+            <p class="result-preview">{{ result.result_text[:120] }}...</p>
+            <div class="favorite-meta">
+              <span class="badge badge-{{ result.confidence|lower }}"
+                >{{ result.confidence }}</span
+              >
+              <span class="date"
+                >{{ result.created_at.strftime('%b %d') }}</span
+              >
+            </div>
+            <div class="favorite-actions">
+              <button
+                class="btn-sm btn-load"
+                onclick="loadResult({{ result.id }})"
+              >
+                <i class="fas fa-external-link-alt"></i> Load
+              </button>
+              <button
+                class="btn-sm btn-unfavorite"
+                onclick="toggleFavorite({{ result.id }})"
+              >
+                <i class="fas fa-star"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-favorites">
+        <i class="far fa-star"></i>
+        <p>No favorites yet. Star your favorite insights!</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Hidden fields -->
+<input type="hidden" id="currentImageId" />
+<input type="hidden" id="currentResultId" />
+{% endblock %} {% block extra_js %}
+<script>
+  let currentImageId = null;
+  let currentResultId = null;
+  let isFavorite = false;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // File upload handling
+    const uploadZone = document.getElementById("uploadZone");
+    const fileInput = document.getElementById("imageUpload");
+    const processBtn = document.getElementById("processBtn");
+    const imagePreview = document.getElementById("imagePreview");
+    const outputActions = document.getElementById("outputActions");
+
+    uploadZone.addEventListener("click", () => fileInput.click());
+    uploadZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadZone.classList.add("dragover");
+    });
+    uploadZone.addEventListener("dragleave", () => {
+      uploadZone.classList.remove("dragover");
+    });
+    uploadZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileUpload();
+      }
+    });
+
+    fileInput.addEventListener("change", handleFileUpload);
+
+    function handleFileUpload() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      // Validate file
+      const validTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
+      if (!validTypes.includes(file.type)) {
+        alert("Please upload a valid image file (JPG, PNG, GIF)");
+        return;
+      }
+
+      if (file.size > 16 * 1024 * 1024) {
+        alert("File size must be less than 16MB");
+        return;
+      }
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        imagePreview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="preview-overlay">
+                        <i class="fas fa-sync-alt"></i> Change Image
+                    </div>
+                `;
+
+        // Enable process button
+        processBtn.disabled = false;
+
+        // Show image info
+        document.getElementById("imageInfo").style.display = "block";
+        document.getElementById("imageSize").textContent = formatFileSize(
+          file.size
+        );
+
+        // Upload to server
+        uploadImage(file);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadImage(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      fetch("/upload", {
+        method: "POST",
+        body: formData,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            currentImageId = data.image_id;
+            document.getElementById("imageCategory").textContent =
+              data.category;
+            document.getElementById("currentImageId").value = data.image_id;
+
+            // Reset output
+            document.getElementById("outputContent").innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-robot"></i>
+                            <p>Image uploaded! Adjust settings and click "Generate AI Insights"</p>
+                        </div>
+                    `;
+            outputActions.style.display = "none";
+          } else {
+            alert("Upload failed: " + data.error);
+          }
+        })
+        .catch((error) => {
+          console.error("Upload error:", error);
+          alert("Upload failed. Please try again.");
+        });
+    }
+
+    // Process image
+    processBtn.addEventListener("click", processImage);
+    document
+      .getElementById("regenerateBtn")
+      .addEventListener("click", processImage);
+
+    function processImage() {
+      if (!currentImageId) return;
+
+      const mode = document.getElementById("aiMode").value;
+      const customPrompt = document.getElementById("customPrompt").value;
+      const tone = document.getElementById("tone").value;
+      const length = document.getElementById("length").value;
+      const language = document.getElementById("language").value;
+
+      // Show loading
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("outputContent").style.display = "none";
+      document.getElementById("confidenceIndicator").style.display = "none";
+
+      fetch("/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image_id: currentImageId,
+          mode: mode,
+          custom_prompt: customPrompt,
+          tone: tone,
+          length: length,
+          language: language,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            currentResultId = data.result_id;
+            document.getElementById("currentResultId").value = data.result_id;
+
+            // Show result
+            displayResult(data.text, data.confidence, data.processing_time);
+
+            // Show regenerate button
+            document.getElementById("regenerateBtn").style.display = "block";
+          } else {
+            alert("Processing failed: " + data.error);
+          }
+        })
+        .catch((error) => {
+          console.error("Processing error:", error);
+          alert("Processing failed. Please try again.");
+        })
+        .finally(() => {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("outputContent").style.display = "block";
+        });
+    }
+
+    function displayResult(text, confidence, processingTime) {
+      const outputContent = document.getElementById("outputContent");
+      outputContent.innerHTML = `
+                <div class="result-text">
+                    ${text.replace(/\n/g, "<br>")}
+                </div>
+            `;
+
+      // Update confidence indicator
+      const confidenceBadge = document.getElementById("confidenceBadge");
+      confidenceBadge.textContent = confidence;
+      confidenceBadge.className = `confidence-badge confidence-${confidence.toLowerCase()}`;
+
+      // Update processing time
+      document.getElementById(
+        "processingTime"
+      ).textContent = `Processed in ${processingTime.toFixed(2)}s`;
+
+      document.getElementById("confidenceIndicator").style.display = "flex";
+      outputActions.style.display = "flex";
+
+      // Check if already favorited
+      checkFavoriteStatus();
+    }
+
+    // Favorite functionality
+    document
+      .getElementById("favoriteBtn")
+      .addEventListener("click", function () {
+        if (!currentResultId) return;
+        toggleFavorite(currentResultId);
+      });
+
+    function checkFavoriteStatus() {
+      if (!currentResultId) return;
+
+      // In a real app, you'd fetch from server
+      // For now, we'll assume not favorited
+      isFavorite = false;
+      updateFavoriteButton();
+    }
+
+    function toggleFavorite(resultId) {
+      const method = isFavorite ? "DELETE" : "POST";
+
+      fetch(`/favorite/${resultId}`, {
+        method: method,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            isFavorite = !isFavorite;
+            updateFavoriteButton();
+
+            // Update UI feedback
+            const icon = document
+              .getElementById("favoriteBtn")
+              .querySelector("i");
+            icon.className = isFavorite ? "fas fa-star" : "far fa-star";
+
+            showNotification(
+              isFavorite ? "Added to favorites!" : "Removed from favorites",
+              isFavorite ? "success" : "info"
+            );
+
+            // Reload favorites section if needed
+            if (window.location.pathname === "/dashboard") {
+              location.reload();
+            }
+          }
+        });
+    }
+
+    function updateFavoriteButton() {
+      const icon = document.getElementById("favoriteBtn").querySelector("i");
+      icon.className = isFavorite ? "fas fa-star" : "far fa-star";
+      document.getElementById("favoriteBtn").title = isFavorite
+        ? "Remove from Favorites"
+        : "Add to Favorites";
+    }
+
+    // Text to Speech
+    document.getElementById("speakBtn").addEventListener("click", function () {
+      if (!currentResultId) return;
+
+      window.open(`/text-to-speech/${currentResultId}`, "_blank");
+    });
+
+    // Export functionality
+    document.getElementById("exportBtn").addEventListener("click", function () {
+      if (!currentResultId) return;
+
+      // Show export options
+      if (confirm("Export as PDF or Text file?")) {
+        window.open(`/export/${currentResultId}/pdf`, "_blank");
+      } else {
+        window.open(`/export/${currentResultId}/txt`, "_blank");
+      }
+    });
+
+    // Utility functions
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + " bytes";
+      else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + " KB";
+      else return (bytes / 1048576).toFixed(2) + " MB";
+    }
+
+    function showNotification(message, type = "info") {
+      const notification = document.createElement("div");
+      notification.className = `notification notification-${type}`;
+      notification.innerHTML = `
+                <i class="fas fa-${
+                  type === "success" ? "check-circle" : "info-circle"
+                }"></i>
+                <span>${message}</span>
+            `;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.classList.add("fade-out");
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+  });
+
+  // Global functions
+  function loadResult(resultId) {
+    fetch(`/result/${resultId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        // Note: For history page results, we can't load the image preview
+        // without the image ID. We'll just load the text.
+
+        // Update current result
+        currentResultId = resultId;
+        document.getElementById("currentResultId").value = resultId;
+
+        // Display result
+        displayResult(data.text, data.confidence, 0);
+
+        // Enable process button (though no image loaded)
+        document.getElementById("processBtn").disabled = true; // No image loaded
+        document.getElementById("regenerateBtn").style.display = "block";
+
+        // Switch to main view if on dashboard
+        if (document.querySelector(".session-section")) {
+          document
+            .querySelector(".session-section")
+            .scrollIntoView({ behavior: "smooth" });
+        }
+      });
+  }
+
+  function deleteImage(imageId) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this image and all its insights? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    fetch(`/delete/${imageId}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          showNotification("Image deleted successfully", "success");
+
+          // Reload page if on history page
+          if (window.location.pathname === "/history") {
+            setTimeout(() => location.reload(), 1000);
+          }
+        }
+      });
+  }
+
+  function resetCurrentSession() {
+    currentImageId = null;
+    currentResultId = null;
+
+    document.getElementById("imagePreview").innerHTML = `
+            <i class="fas fa-image"></i>
+            <p>Your image will appear here</p>
+        `;
+    document.getElementById("imageInfo").style.display = "none";
+    document.getElementById("outputContent").innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-robot"></i>
+                <p>Upload an image and click "Generate AI Insights" to begin</p>
+            </div>
+        `;
+    document.getElementById("outputActions").style.display = "none";
+    document.getElementById("processBtn").disabled = true;
+    document.getElementById("regenerateBtn").style.display = "none";
+  }
+</script>
+{% endblock %}

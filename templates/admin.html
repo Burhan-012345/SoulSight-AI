@@ -1,0 +1,202 @@
+{% extends "base.html" %} {% block title %}Admin Dashboard - SoulSight AI{%
+endblock %} {% block extra_css %}
+<style>
+  .admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+  }
+
+  .stat-card i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card h2 {
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="admin-header">
+  <h1><i class="fas fa-crown"></i> Admin Dashboard</h1>
+  <p>System overview and management</p>
+</div>
+
+<div class="admin-grid">
+  <div class="stat-card">
+    <i class="fas fa-users"></i>
+    <h2>{{ total_users }}</h2>
+    <p>Total Users</p>
+  </div>
+
+  <div class="stat-card">
+    <i class="fas fa-images"></i>
+    <h2>{{ total_images }}</h2>
+    <p>Images Processed</p>
+  </div>
+
+  <div class="stat-card">
+    <i class="fas fa-brain"></i>
+    <h2>{{ total_results }}</h2>
+    <p>AI Results Generated</p>
+  </div>
+
+  <div class="stat-card">
+    <i class="fas fa-chart-bar"></i>
+    <h2>{{ mode_stats[0].count if mode_stats else 0 }}</h2>
+    <p>Most Used Mode: {{ mode_stats[0].mode if mode_stats else 'N/A' }}</p>
+  </div>
+</div>
+
+<div class="admin-sections">
+  <!-- Mode Statistics -->
+  <div class="admin-section">
+    <h3><i class="fas fa-chart-pie"></i> Mode Usage Statistics</h3>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Mode</th>
+          <th>Usage Count</th>
+          <th>Percentage</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stat in mode_stats %}
+        <tr>
+          <td>{{ stat.mode|replace('_', ' ')|title }}</td>
+          <td>{{ stat.count }}</td>
+          <td>
+            {{ "%.1f"|format(stat.count / total_results * 100 if total_results >
+            0 else 0) }}%
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="admin-section">
+    <h3><i class="fas fa-history"></i> Recent Image Uploads</h3>
+    <div class="activity-list">
+      {% for image in recent_images %}
+      <div class="activity-item">
+        <div class="activity-preview">
+          <img
+            src="{{ url_for('static', filename='uploads/' + image.filename) }}"
+            alt="{{ image.original_filename }}"
+            style="
+              width: 60px;
+              height: 60px;
+              object-fit: cover;
+              border-radius: 8px;
+            "
+          />
+        </div>
+        <div class="activity-details">
+          <h4>{{ image.user.name }}</h4>
+          <p>{{ image.original_filename }}</p>
+          <div class="activity-meta">
+            <span class="badge">{{ image.category }}</span>
+            <span class="time"
+              >{{ image.created_at.strftime('%Y-%m-%d %H:%M') }}</span
+            >
+          </div>
+        </div>
+        <div class="activity-actions">
+          <span class="file-size">{{ image.file_size // 1024 }} KB</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- User Management -->
+  <div class="admin-section">
+    <h3><i class="fas fa-user-cog"></i> User Management</h3>
+    <p class="admin-note">
+      <i class="fas fa-exclamation-triangle"></i>
+      User deletion is permanent and removes all associated images and results.
+    </p>
+    <div class="search-box">
+      <input
+        type="text"
+        id="userSearch"
+        placeholder="Search users by email or name..."
+      />
+      <i class="fas fa-search"></i>
+    </div>
+    <div id="userList" class="user-list">
+      <!-- Users will be loaded via JavaScript -->
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Load users
+    function loadUsers(search = "") {
+      // In a real app, you'd fetch from /admin/users API
+      // For this example, we'll show a message
+      document.getElementById("userList").innerHTML = `
+                <div class="admin-note">
+                    <i class="fas fa-info-circle"></i>
+                    User management API would be implemented here.
+                    Search: "${search}"
+                </div>
+            `;
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById("userSearch");
+    let searchTimeout;
+
+    searchInput.addEventListener("input", function () {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        loadUsers(this.value);
+      }, 500);
+    });
+
+    // Initial load
+    loadUsers();
+  });
+
+  function deleteUser(userId) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this user? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    fetch(`/admin/delete-user/${userId}`, {
+      method: "DELETE",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          alert("User deleted successfully");
+          loadUsers(document.getElementById("userSearch").value);
+        } else {
+          alert("Error: " + data.error);
+        }
+      })
+      .catch((error) => {
+        console.error("Delete error:", error);
+        alert("Delete failed. Please try again.");
+      });
+  }
+</script>
+{% endblock %}

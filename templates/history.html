@@ -1,0 +1,1909 @@
+{% extends "base.html" %} {% block title %}History - SoulSight AI{% endblock %}
+{% block extra_css %}
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Main container */
+  .history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  /* Header section */
+  .history-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .history-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .history-header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+  }
+
+  /* Stats cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+  }
+
+  .stat-card .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin: 0;
+  }
+
+  .stat-card .stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin: 0.5rem 0 0;
+  }
+
+  /* Controls section */
+  .controls-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .bulk-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .filter-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filter-label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .filter-select,
+  .search-input {
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+
+  .filter-select:focus,
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  /* Cooldown warning */
+  .cooldown-warning {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+  }
+
+  .cooldown-warning i {
+    font-size: 1.5rem;
+    color: #ff9800;
+  }
+
+  .cooldown-content h4 {
+    margin: 0 0 0.5rem 0;
+    color: #e65100;
+  }
+
+  .cooldown-content p {
+    margin: 0;
+    color: #ff9800;
+    font-size: 0.95rem;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    color: var(--border-color);
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Image list */
+  .image-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Image card */
+  .image-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .image-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .image-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .image-card-header h3 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin: 0;
+    word-break: break-word;
+  }
+
+  .image-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .image-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .image-preview-section {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 2rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  @media (max-width: 768px) {
+    .image-preview-section {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .image-thumbnail-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .image-thumbnail {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .image-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--border-color);
+  }
+
+  .detail-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .detail-value {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .category-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* Analysis section */
+  .analysis-section {
+    padding: 1.5rem;
+  }
+
+  .analysis-section h4 {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .analysis-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Analysis item */
+  .analysis-item {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .analysis-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .analysis-title h5 {
+    font-size: 1rem;
+    color: var(--text-primary);
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  .analysis-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .confidence-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .confidence-high {
+    background: var(--success-light);
+    color: var(--success-color);
+  }
+
+  .confidence-medium {
+    background: var(--warning-light);
+    color: var(--warning-color);
+  }
+
+  .confidence-low {
+    background: var(--danger-light);
+    color: var(--danger-color);
+  }
+
+  .time-badge {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .cached-badge {
+    background: var(--info-light);
+    color: var(--info-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 0.5rem;
+  }
+
+  .analysis-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .action-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .action-btn:hover {
+    background: var(--bg-primary);
+    color: var(--primary-color);
+  }
+
+  /* Analysis Content */
+  .analysis-content-wrapper {
+    position: relative;
+  }
+
+  .analysis-content {
+    color: var(--text-primary) !important;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", Arial, sans-serif;
+    cursor: default;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+  }
+
+  /* Lock text color at all times */
+  .analysis-content,
+  .analysis-content *,
+  .analysis-content:hover,
+  .analysis-content:focus,
+  .analysis-content:active,
+  .analysis-content:hover *,
+  .analysis-content:focus *,
+  .analysis-content:active * {
+    color: var(--text-primary) !important;
+  }
+
+  /* Remove caret completely */
+  .analysis-content {
+    caret-color: transparent !important;
+  }
+
+  /* Style selections to match theme */
+  .analysis-content::selection {
+    background: rgba(var(--primary-rgb, 0, 123, 255), 0.2) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .analysis-content::-moz-selection {
+    background: rgba(var(--primary-rgb, 0, 123, 255), 0.2) !important;
+    color: var(--text-primary) !important;
+  }
+
+  /* Prevent any background changes */
+  .analysis-content:hover,
+  .analysis-content:focus,
+  .analysis-content:active {
+    background: transparent !important;
+    outline: none !important;
+  }
+
+  .expandable {
+    max-height: 150px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .expandable::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: linear-gradient(transparent, var(--bg-secondary));
+  }
+
+  .expanded {
+    max-height: none;
+  }
+
+  .expanded::after {
+    display: none;
+  }
+
+  .show-more-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .show-more-btn:hover {
+    text-decoration: underline;
+  }
+
+  /* Analysis prompt */
+  .analysis-prompt {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+    border-left: 3px solid var(--primary-color);
+  }
+
+  .analysis-prompt strong {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+
+  .analysis-prompt small {
+    color: var(--text-primary) !important;
+    opacity: 0.9;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .page-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-radius: 8px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .page-btn:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .page-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 10000;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .notification-success {
+    background: var(--success-light);
+    color: var(--success-color);
+    border-left: 4px solid var(--success-color);
+  }
+
+  .notification-error {
+    background: var(--danger-light);
+    color: var(--danger-color);
+    border-left: 4px solid var(--danger-color);
+  }
+
+  .notification-warning {
+    background: var(--warning-light);
+    color: var(--warning-color);
+    border-left: 4px solid var(--warning-color);
+  }
+
+  .notification-info {
+    background: var(--info-light);
+    color: var(--info-color);
+    border-left: 4px solid var(--info-color);
+  }
+
+  /* CUSTOM ALERT DIALOG STYLES */
+  .custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .custom-alert-dialog {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    animation: slideUp 0.3s ease;
+  }
+
+  .custom-alert-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .custom-alert-icon.warning {
+    color: var(--warning-color);
+  }
+
+  .custom-alert-icon.danger {
+    color: var(--danger-color);
+  }
+
+  .custom-alert-icon.info {
+    color: var(--info-color);
+  }
+
+  .custom-alert-title {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .custom-alert-message {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  .custom-alert-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+    transition: border-color 0.2s;
+  }
+
+  .custom-alert-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  .custom-alert-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .custom-alert-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    min-width: 120px;
+  }
+
+  .custom-alert-btn-primary {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .custom-alert-btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+  }
+
+  .custom-alert-btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .custom-alert-btn-secondary:hover {
+    background: var(--border-color);
+  }
+
+  .custom-alert-btn-danger {
+    background: var(--danger-color);
+    color: white;
+  }
+
+  .custom-alert-btn-danger:hover {
+    background: var(--danger-dark);
+    transform: translateY(-1px);
+  }
+
+  .custom-alert-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Theme variables */
+  :root {
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #e0e0e0;
+    --primary-color: #007bff;
+    --primary-dark: #0056b3;
+    --primary-light: #e6f3ff;
+    --success-color: #28a745;
+    --success-light: #d4edda;
+    --warning-color: #ffc107;
+    --warning-light: #fff3cd;
+    --danger-color: #dc3545;
+    --danger-dark: #bd2130;
+    --danger-light: #f8d7da;
+    --info-color: #17a2b8;
+    --info-light: #d1ecf1;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+    --primary-rgb: 0, 123, 255;
+  }
+
+  [data-theme="dark"] {
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --card-bg: #2d2d2d;
+    --border-color: #404040;
+    --primary-light: rgba(0, 123, 255, 0.2);
+    --success-light: rgba(40, 167, 69, 0.2);
+    --warning-light: rgba(255, 193, 7, 0.2);
+    --danger-light: rgba(220, 53, 69, 0.2);
+    --info-light: rgba(23, 162, 184, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .history-container {
+      padding: 1rem;
+    }
+
+    .history-header h1 {
+      font-size: 2rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card .stat-value {
+      font-size: 2rem;
+    }
+
+    .bulk-actions {
+      flex-direction: column;
+    }
+
+    .bulk-actions .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .image-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .analysis-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .analysis-meta {
+      width: 100%;
+    }
+
+    .custom-alert-dialog {
+      padding: 1.5rem;
+      width: 95%;
+    }
+
+    .custom-alert-actions {
+      flex-direction: column;
+    }
+
+    .custom-alert-btn {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
+<div class="history-container">
+  <!-- Header -->
+  <div class="history-header">
+    <h1><i class="fas fa-history"></i> Analysis History</h1>
+    <p>Review and manage all your AI-powered image analyses</p>
+  </div>
+
+  <!-- Cooldown Warning (shown when in cooldown) -->
+  <div id="cooldownWarning" class="cooldown-warning" style="display: none">
+    <i class="fas fa-clock"></i>
+    <div class="cooldown-content">
+      <h4><i class="fas fa-exclamation-triangle"></i> API Cooldown Active</h4>
+      <p>
+        Please wait <span id="cooldownTimer">20s</span> before making another
+        analysis request to avoid quota limits.
+      </p>
+    </div>
+  </div>
+
+  {% if images_with_results %}
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p class="stat-value">{{ images_with_results|length }}</p>
+      <p class="stat-label">Total Images</p>
+    </div>
+    {% set total_analyses =
+    images_with_results|map(attribute='results')|map('length')|sum %}
+    <div class="stat-card">
+      <p class="stat-value">{{ total_analyses }}</p>
+      <p class="stat-label">Total Analyses</p>
+    </div>
+    {% set cached_analyses =
+    images_with_results|map(attribute='results')|map('selectattr',
+    'processing_time')|map('list')|map('length')|sum %}
+    <div class="stat-card">
+      <p class="stat-value">{{ cached_analyses }}</p>
+      <p class="stat-label">Cached Results</p>
+    </div>
+    <div class="stat-card">
+      {% set unique_modes = [] %} {% for item in images_with_results %} {% for
+      result in item.results %} {% if result.mode not in unique_modes %} {% set
+      unique_modes = unique_modes + [result.mode] %} {% endif %} {% endfor %} {%
+      endfor %}
+      <p class="stat-value">{{ unique_modes|length }}</p>
+      <p class="stat-label">Analysis Modes</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-section">
+    <div class="bulk-actions">
+      <button
+        class="btn btn-danger"
+        onclick="showDeleteAllConfirmation()"
+        {%
+        if
+        not
+        images_with_results
+        %}disabled{%
+        endif
+        %}
+      >
+        <i class="fas fa-trash"></i> Delete All History
+      </button>
+      <button
+        class="btn btn-info"
+        onclick="exportAllHistory()"
+        {%
+        if
+        not
+        images_with_results
+        %}disabled{%
+        endif
+        %}
+      >
+        <i class="fas fa-file-export"></i> Export as JSON
+      </button>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+      </a>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <select
+          class="filter-select"
+          id="filterCategory"
+          onchange="filterHistory()"
+        >
+          <option value="">All Categories</option>
+          <option value="Nature">Nature</option>
+          <option value="Food">Food</option>
+          <option value="Education">Education</option>
+          <option value="Technology">Technology</option>
+          <option value="People">People</option>
+          <option value="Art">Art</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Time Period</label>
+        <select
+          class="filter-select"
+          id="filterDate"
+          onchange="filterHistory()"
+        >
+          <option value="">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+          <option value="year">This Year</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Analysis Mode</label>
+        <select
+          class="filter-select"
+          id="filterMode"
+          onchange="filterHistory()"
+        >
+          <option value="">All Modes</option>
+          <option value="caption">Caption</option>
+          <option value="detailed_description">Detailed Description</option>
+          <option value="educational">Educational</option>
+          <option value="creative_story">Creative Story</option>
+          <option value="keywords">Keywords</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Search</label>
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          placeholder="Search filenames, content..."
+          oninput="filterHistory()"
+        />
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">&nbsp;</label>
+        <button class="btn btn-secondary" onclick="clearFilters()">
+          <i class="fas fa-times"></i> Clear Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image List -->
+  <div class="image-list">
+    {% for item in images_with_results %}
+    <div
+      class="image-card"
+      data-category="{{ item.image.category or 'Uncategorized' }}"
+      data-date="{{ item.image.created_at.strftime('%Y-%m-%d') }}"
+      data-image-id="{{ item.image.id }}"
+      data-modes="{% for result in item.results %}{{ result.mode }} {% endfor %}"
+    >
+      <!-- Header -->
+      <div class="image-card-header">
+        <h3>{{ item.image.original_filename }}</h3>
+        <div class="image-meta">
+          <span class="image-meta-item">
+            <i class="far fa-calendar"></i>
+            {{ item.image.created_at.strftime('%b %d, %Y') }}
+          </span>
+          <span class="image-meta-item">
+            <i class="far fa-clock"></i>
+            {{ item.image.created_at.strftime('%I:%M %p') }}
+          </span>
+          <span class="category-badge"
+            >{{ item.image.category or 'Uncategorized' }}</span
+          >
+        </div>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview-section">
+        <div class="image-thumbnail-container">
+          <div class="image-thumbnail">
+            <img
+              src="{{ url_for('static', filename='uploads/' + item.image.filename) }}"
+              alt="{{ item.image.original_filename }}"
+              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD48L3N2Zz4K'"
+            />
+          </div>
+          <div class="image-actions">
+            <button
+              class="btn btn-primary btn-sm"
+              onclick="analyzeImage({{ item.image.id }})"
+              id="analyzeBtn-{{ item.image.id }}"
+            >
+              <i class="fas fa-magic"></i> Analyze Again
+            </button>
+            <button
+              class="btn btn-danger btn-sm"
+              onclick="showDeleteImageConfirmation({{ item.image.id }})"
+            >
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+
+        <div class="image-details">
+          <div class="detail-item">
+            <span class="detail-label">File Size</span>
+            <span class="detail-value">
+              {% if item.image.file_size %} {{
+              "%.2f"|format(item.image.file_size / 1024 / 1024) }} MB {% else %}
+              Unknown {% endif %}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Analyses</span>
+            <span class="detail-value">{{ item.results|length }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Uploaded</span>
+            <span class="detail-value"
+              >{{ item.image.created_at.strftime('%B %d, %Y') }}</span
+            >
+          </div>
+          {% if item.results %}
+          <div class="detail-item">
+            <span class="detail-label">Analysis Modes</span>
+            <span class="detail-value">
+              {% set modes = [] %} {% for result in item.results %} {% if
+              result.mode not in modes %} {% set modes = modes + [result.mode]
+              %} {% endif %} {% endfor %} {{ modes|join(', ')|replace('_', '
+              ')|title }}
+            </span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Analysis Results -->
+      {% if item.results %}
+      <div class="analysis-section">
+        <h4>
+          <i class="fas fa-brain"></i> AI Analyses ({{ item.results|length }})
+        </h4>
+
+        <div class="analysis-list">
+          {% for result in item.results %}
+          <div class="analysis-item">
+            <!-- Analysis Header -->
+            <div class="analysis-header">
+              <div class="analysis-title">
+                <i
+                  class="fas fa-{{
+                  'quote-left' if result.mode == 'caption'
+                  else 'file-alt' if result.mode == 'detailed_description'
+                  else 'book' if result.mode == 'educational'
+                  else 'pen-fancy' if result.mode == 'creative_story'
+                  else 'tags'
+                }}"
+                ></i>
+                <h5>{{ result.mode|replace('_', ' ')|title }}</h5>
+                {% if result.processing_time and result.processing_time < 0.5 %}
+                <span class="cached-badge" title="Cached result (instant)">
+                  <i class="fas fa-bolt"></i> Cached
+                </span>
+                {% endif %}
+              </div>
+
+              <div class="analysis-meta">
+                <span
+                  class="confidence-badge confidence-{{ result.confidence|lower if result.confidence else 'medium' }}"
+                >
+                  {{ result.confidence or 'Medium' }} Confidence
+                </span>
+                <span class="time-badge">
+                  <i class="fas fa-stopwatch"></i>
+                  {% if result.processing_time %} {{
+                  "%.2f"|format(result.processing_time) }}s {% else %} Instant
+                  {% endif %}
+                </span>
+              </div>
+
+              <div class="analysis-actions">
+                {% set is_favorite = result.id in favorite_ids %}
+                <button
+                  class="action-btn"
+                  onclick="toggleFavorite({{ result.id }})"
+                  title="{{ 'Remove from Favorites' if is_favorite else 'Add to Favorites' }}"
+                >
+                  <i
+                    class="{{ 'fas' if is_favorite else 'far' }} fa-star"
+                    style="color: {{ '#ffc107' if is_favorite else '' }}"
+                  ></i>
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="loadResult({{ result.id }})"
+                  title="Load in Dashboard"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="copyToClipboard({{ result.id }})"
+                  title="Copy to Clipboard"
+                >
+                  <i class="fas fa-copy"></i>
+                </button>
+                <button
+                  class="action-btn"
+                  onclick="textToSpeech({{ result.id }})"
+                  title="Text to Speech"
+                >
+                  <i class="fas fa-volume-up"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Analysis Content -->
+            <div class="analysis-content-wrapper">
+              <div
+                class="analysis-content {% if result.result_text|length > 300 %}expandable{% endif %}"
+                id="analysis-content-{{ result.id }}"
+              >
+                {{ result.result_text|replace('\n', '<br />')|safe }}
+              </div>
+
+              {% if result.result_text|length > 300 %}
+              <button
+                class="show-more-btn"
+                onclick="toggleExpand({{ result.id }})"
+              >
+                <i class="fas fa-chevron-down"></i> Show More
+              </button>
+              {% endif %}
+            </div>
+
+            <!-- Analysis Prompt -->
+            {% if result.prompt %}
+            <div class="analysis-prompt">
+              <strong><i class="fas fa-comment"></i> Prompt:</strong>
+              <small>{{ result.prompt }}</small>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <div class="analysis-section">
+        <div class="empty-state" style="padding: 2rem">
+          <p>
+            <i class="fas fa-info-circle text-info"></i> No analyses for this
+            image yet.
+          </p>
+          <button
+            class="btn btn-primary btn-sm"
+            onclick="analyzeImage({{ item.image.id }})"
+            id="analyzeBtnEmpty-{{ item.image.id }}"
+          >
+            <i class="fas fa-magic"></i> Analyze Now
+          </button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if images_with_results|length > 5 %}
+  <div class="pagination">
+    <button class="page-btn" onclick="changePage(-1)">
+      <i class="fas fa-chevron-left"></i> Previous
+    </button>
+    <span class="page-info">Page 1</span>
+    <button class="page-btn" onclick="changePage(1)">
+      Next <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+  {% endif %} {% else %}
+  <!-- Empty State -->
+  <div class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-images"></i>
+    </div>
+    <h3>No History Yet</h3>
+    <p>
+      You haven't analyzed any images yet. Upload your first image to get
+      started!
+    </p>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+      <i class="fas fa-upload"></i> Upload First Image
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none">
+  <div class="spinner"></div>
+</div>
+
+<!-- Custom Alert Dialogs -->
+<div id="customAlert" class="custom-alert-overlay" style="display: none">
+  <div class="custom-alert-dialog">
+    <div class="custom-alert-icon warning">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <h3 class="custom-alert-title">Delete Image</h3>
+    <p class="custom-alert-message">
+      Are you sure you want to delete this image and all its analyses? This
+      action cannot be undone.
+    </p>
+    <div class="custom-alert-actions">
+      <button
+        class="custom-alert-btn custom-alert-btn-secondary"
+        onclick="closeCustomAlert()"
+      >
+        Cancel
+      </button>
+      <button
+        class="custom-alert-btn custom-alert-btn-danger"
+        onclick="confirmDeleteAction()"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  id="customDeleteAllAlert"
+  class="custom-alert-overlay"
+  style="display: none"
+>
+  <div class="custom-alert-dialog">
+    <div class="custom-alert-icon danger">
+      <i class="fas fa-skull-crossbones"></i>
+    </div>
+    <h3 class="custom-alert-title">Delete All History</h3>
+    <p class="custom-alert-message">
+      WARNING: This will permanently delete ALL your image history and analyses.
+      This action cannot be undone.
+    </p>
+    <input
+      type="text"
+      id="deleteAllConfirmation"
+      class="custom-alert-input"
+      placeholder="Type 'DELETE ALL' to confirm"
+    />
+    <div class="custom-alert-actions">
+      <button
+        class="custom-alert-btn custom-alert-btn-secondary"
+        onclick="closeCustomDeleteAllAlert()"
+      >
+        Cancel
+      </button>
+      <button
+        class="custom-alert-btn custom-alert-btn-danger"
+        id="deleteAllConfirmBtn"
+        onclick="confirmDeleteAllAction()"
+        disabled
+      >
+        Delete All
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="customInfoAlert" class="custom-alert-overlay" style="display: none">
+  <div class="custom-alert-dialog">
+    <div class="custom-alert-icon info">
+      <i class="fas fa-info-circle"></i>
+    </div>
+    <h3 class="custom-alert-title" id="infoAlertTitle">Information</h3>
+    <p class="custom-alert-message" id="infoAlertMessage">
+      This is an information message.
+    </p>
+    <div class="custom-alert-actions">
+      <button
+        class="custom-alert-btn custom-alert-btn-primary"
+        onclick="closeCustomInfoAlert()"
+      >
+        OK
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block extra_js %}
+<script>
+  // State management
+  let pendingDeleteImageId = null;
+  let pendingAction = null;
+  let isInCooldown = false;
+  let cooldownEndTime = null;
+  let cooldownInterval = null;
+  let isProcessing = false;
+
+  // Initialize when page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add fade-in animation to cards
+    const cards = document.querySelectorAll(".image-card");
+    cards.forEach((card, index) => {
+      card.style.opacity = "0";
+      card.style.transform = "translateY(20px)";
+
+      setTimeout(() => {
+        card.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+        card.style.opacity = "1";
+        card.style.transform = "translateY(0)";
+      }, index * 50);
+    });
+
+    // Initialize expandable content
+    document.querySelectorAll(".show-more-btn").forEach((btn) => {
+      const resultId = btn.getAttribute("onclick").match(/\d+/)[0];
+      btn.addEventListener("click", function () {
+        toggleExpand(resultId);
+      });
+    });
+
+    // Add input validation for delete all confirmation
+    const deleteAllInput = document.getElementById("deleteAllConfirmation");
+    const deleteAllBtn = document.getElementById("deleteAllConfirmBtn");
+
+    if (deleteAllInput && deleteAllBtn) {
+      deleteAllInput.addEventListener("input", function () {
+        deleteAllBtn.disabled = this.value !== "DELETE ALL";
+      });
+    }
+
+    // Check cooldown status on page load
+    checkCooldownStatus();
+  });
+
+  // Cooldown management
+  function checkCooldownStatus() {
+    fetch("/api/cooldown-status")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.can_call && data.wait_time > 0) {
+          startCooldown(data.wait_time, data.message);
+        }
+      })
+      .catch((error) => {
+        console.error("Error checking cooldown:", error);
+      });
+  }
+
+  function startCooldown(seconds, message) {
+    isInCooldown = true;
+    cooldownEndTime = Date.now() + seconds * 1000;
+
+    // Show cooldown warning
+    const warning = document.getElementById("cooldownWarning");
+    const timer = document.getElementById("cooldownTimer");
+    warning.style.display = "flex";
+
+    // Disable all analyze buttons
+    document.querySelectorAll('[id^="analyzeBtn"]').forEach((btn) => {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-clock"></i> Cooldown Active';
+    });
+
+    // Start countdown
+    updateCooldownDisplay();
+    clearInterval(cooldownInterval);
+    cooldownInterval = setInterval(updateCooldownDisplay, 1000);
+  }
+
+  function updateCooldownDisplay() {
+    if (!cooldownEndTime) return;
+
+    const now = Date.now();
+    const remainingMs = cooldownEndTime - now;
+
+    if (remainingMs <= 0) {
+      // Cooldown finished
+      clearInterval(cooldownInterval);
+      document.getElementById("cooldownWarning").style.display = "none";
+      isInCooldown = false;
+      cooldownEndTime = null;
+
+      // Re-enable analyze buttons
+      document.querySelectorAll('[id^="analyzeBtn"]').forEach((btn) => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic"></i> Analyze Again';
+      });
+      return;
+    }
+
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+    document.getElementById(
+      "cooldownTimer"
+    ).textContent = `${remainingSeconds}s`;
+  }
+
+  function checkIfInCooldown() {
+    if (isInCooldown) {
+      showNotification("Please wait for cooldown to finish", "warning");
+      return true;
+    }
+    return false;
+  }
+
+  function toggleExpand(resultId) {
+    const content = document.getElementById(`analysis-content-${resultId}`);
+    const btn = content.nextElementSibling;
+
+    if (content.classList.contains("expanded")) {
+      content.classList.remove("expanded");
+      if (btn) btn.innerHTML = '<i class="fas fa-chevron-down"></i> Show More';
+    } else {
+      content.classList.add("expanded");
+      if (btn) btn.innerHTML = '<i class="fas fa-chevron-up"></i> Show Less';
+    }
+  }
+
+  function filterHistory() {
+    const category = document.getElementById("filterCategory").value;
+    const dateFilter = document.getElementById("filterDate").value;
+    const modeFilter = document.getElementById("filterMode").value;
+    const searchTerm = document
+      .getElementById("searchInput")
+      .value.toLowerCase();
+
+    const cards = document.querySelectorAll(".image-card");
+    let visibleCount = 0;
+    const now = new Date();
+
+    cards.forEach((card) => {
+      let show = true;
+      const cardCategory = card.dataset.category || "";
+      const cardDate = new Date(card.dataset.date);
+      const cardModes = card.dataset.modes || "";
+
+      // Category filter
+      if (
+        category &&
+        category !== "Uncategorized" &&
+        cardCategory !== category
+      ) {
+        show = false;
+      }
+
+      // Date filter
+      if (dateFilter === "today") {
+        const today = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate()
+        );
+        if (cardDate < today) show = false;
+      } else if (dateFilter === "week") {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        if (cardDate < weekAgo) show = false;
+      } else if (dateFilter === "month") {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        if (cardDate < monthAgo) show = false;
+      } else if (dateFilter === "year") {
+        const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        if (cardDate < yearAgo) show = false;
+      }
+
+      // Mode filter
+      if (modeFilter && !cardModes.includes(modeFilter)) {
+        show = false;
+      }
+
+      // Search filter
+      if (searchTerm) {
+        const text = card.textContent.toLowerCase();
+        if (!text.includes(searchTerm)) {
+          show = false;
+        }
+      }
+
+      card.style.display = show ? "block" : "none";
+      if (show) visibleCount++;
+    });
+
+    // Show no results message
+    const noResults = document.querySelector(".no-results-message");
+    if (visibleCount === 0 && cards.length > 0) {
+      if (!noResults) {
+        const message = document.createElement("div");
+        message.className = "empty-state no-results-message";
+        message.innerHTML = `
+          <div class="empty-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>No Results Found</h3>
+          <p>Try adjusting your filters or search terms.</p>
+          <button class="btn btn-secondary" onclick="clearFilters()">
+            <i class="fas fa-times"></i> Clear Filters
+          </button>
+        `;
+        document.querySelector(".image-list").appendChild(message);
+      }
+    } else if (noResults) {
+      noResults.remove();
+    }
+  }
+
+  function clearFilters() {
+    document.getElementById("filterCategory").value = "";
+    document.getElementById("filterDate").value = "";
+    document.getElementById("filterMode").value = "";
+    document.getElementById("searchInput").value = "";
+    filterHistory();
+  }
+
+  function showLoading() {
+    document.getElementById("loadingOverlay").style.display = "flex";
+  }
+
+  function hideLoading() {
+    document.getElementById("loadingOverlay").style.display = "none";
+  }
+
+  function showNotification(message, type = "info") {
+    // Remove existing notifications
+    document.querySelectorAll(".notification").forEach((n) => n.remove());
+
+    const notification = document.createElement("div");
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+      <i class="fas fa-${
+        type === "success"
+          ? "check-circle"
+          : type === "error"
+          ? "exclamation-circle"
+          : type === "warning"
+          ? "exclamation-triangle"
+          : "info-circle"
+      }"></i>
+      <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.animation = "slideIn 0.3s ease reverse";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+  }
+
+  // Custom Alert Functions
+  function showDeleteImageConfirmation(imageId) {
+    pendingDeleteImageId = imageId;
+    document.getElementById("customAlert").style.display = "flex";
+  }
+
+  function showDeleteAllConfirmation() {
+    document.getElementById("customDeleteAllAlert").style.display = "flex";
+    const input = document.getElementById("deleteAllConfirmation");
+    const btn = document.getElementById("deleteAllConfirmBtn");
+    if (input) input.value = "";
+    if (btn) btn.disabled = true;
+  }
+
+  function showInfoAlert(title, message) {
+    document.getElementById("infoAlertTitle").textContent = title;
+    document.getElementById("infoAlertMessage").textContent = message;
+    document.getElementById("customInfoAlert").style.display = "flex";
+  }
+
+  function closeCustomAlert() {
+    document.getElementById("customAlert").style.display = "none";
+    pendingDeleteImageId = null;
+  }
+
+  function closeCustomDeleteAllAlert() {
+    document.getElementById("customDeleteAllAlert").style.display = "none";
+  }
+
+  function closeCustomInfoAlert() {
+    document.getElementById("customInfoAlert").style.display = "none";
+  }
+
+  function confirmDeleteAction() {
+    if (pendingDeleteImageId) {
+      deleteImage(pendingDeleteImageId);
+      closeCustomAlert();
+    }
+  }
+
+  function confirmDeleteAllAction() {
+    const input = document.getElementById("deleteAllConfirmation");
+    if (input && input.value === "DELETE ALL") {
+      deleteAllHistory();
+      closeCustomDeleteAllAlert();
+    }
+  }
+
+  // Action functions
+  function analyzeImage(imageId) {
+    // Check cooldown first
+    if (checkIfInCooldown()) return;
+
+    // Check if already processing
+    if (isProcessing) {
+      showNotification("Please wait, already processing...", "warning");
+      return;
+    }
+
+    isProcessing = true;
+    showLoading();
+
+    // Disable the button that was clicked
+    const btn =
+      document.getElementById(`analyzeBtn-${imageId}`) ||
+      document.getElementById(`analyzeBtnEmpty-${imageId}`);
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    }
+
+    // Redirect to dashboard with image ID
+    setTimeout(() => {
+      window.location.href = `/dashboard?loadImage=${imageId}`;
+    }, 500);
+  }
+
+  function loadResult(resultId) {
+    window.location.href = `/dashboard?loadResult=${resultId}`;
+  }
+
+  async function deleteImage(imageId) {
+    showLoading();
+    try {
+      const response = await fetch(`/delete/${imageId}`, {
+        method: "DELETE",
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+      });
+      const data = await response.json();
+
+      hideLoading();
+      if (data.success) {
+        showNotification("Image and analyses deleted successfully", "success");
+        const card = document.querySelector(`[data-image-id="${imageId}"]`);
+        if (card) {
+          card.style.transition = "all 0.3s ease";
+          card.style.opacity = "0";
+          card.style.transform = "translateY(-20px)";
+          setTimeout(() => card.remove(), 300);
+        }
+      } else {
+        showNotification("Error: " + data.error, "error");
+      }
+    } catch (error) {
+      hideLoading();
+      showNotification("Error deleting image", "error");
+      console.error("Delete error:", error);
+    }
+  }
+
+  function deleteAllHistory() {
+    showLoading();
+    fetch("/history/delete-all", {
+      method: "DELETE",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        hideLoading();
+        if (data.success) {
+          showNotification("All history deleted successfully", "success");
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          showNotification("Error: " + data.error, "error");
+        }
+      })
+      .catch((error) => {
+        hideLoading();
+        showNotification("Error deleting history", "error");
+        console.error("Delete all error:", error);
+      });
+  }
+
+  function copyToClipboard(resultId) {
+    const content = document.getElementById(
+      `analysis-content-${resultId}`
+    ).textContent;
+    navigator.clipboard
+      .writeText(content)
+      .then(() => showNotification("Copied to clipboard!", "success"))
+      .catch(() => showNotification("Failed to copy", "error"));
+  }
+
+  function textToSpeech(resultId) {
+    window.open(`/text-to-speech/${resultId}`, "_blank");
+  }
+
+  async function toggleFavorite(resultId) {
+    try {
+      // First check if it's already favorited
+      const isFavorited = document
+        .querySelector(`[onclick="toggleFavorite(${resultId})"] i`)
+        .classList.contains("fas");
+      const method = isFavorited ? "DELETE" : "POST";
+
+      const response = await fetch(`/favorite/${resultId}`, {
+        method: method,
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        const icon = document.querySelector(
+          `[onclick="toggleFavorite(${resultId})"] i`
+        );
+        if (isFavorited) {
+          icon.className = "far fa-star";
+          showNotification("Removed from favorites", "info");
+        } else {
+          icon.className = "fas fa-star";
+          icon.style.color = "#ffc107";
+          showNotification("Added to favorites!", "success");
+        }
+      }
+    } catch (error) {
+      showNotification("Error updating favorite", "error");
+      console.error("Favorite error:", error);
+    }
+  }
+
+  function exportAllHistory() {
+    showInfoAlert(
+      "Export Feature",
+      "Click OK to download your analysis history as a JSON file."
+    );
+
+    // Actually trigger the download
+    setTimeout(() => {
+      window.open("/history/export-json", "_blank");
+    }, 500);
+  }
+
+  function changePage(direction) {
+    showInfoAlert(
+      "Pagination",
+      "Pagination feature is coming in the next update!"
+    );
+  }
+
+  // Add CSS for animations
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes fadeOut {
+      from { opacity: 1; transform: translateY(0); }
+      to { opacity: 0; transform: translateY(-20px); }
+    }
+    
+    @keyframes slideInReverse {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+    
+    .spinner-small {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-color);
+      border-top: 2px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+{% endblock %}

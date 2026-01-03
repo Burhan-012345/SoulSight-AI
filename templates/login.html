@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block title %}Login - SoulSight AI{% endblock %} {%
+block content %}
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <i class="fas fa-eye login-logo"></i>
+      <h1>Welcome to SoulSight AI</h1>
+      <p>Sign in with your Google account to begin your visual journey</p>
+    </div>
+
+    <div class="login-body">
+      <a href="{{ google_auth_url }}" class="google-login-btn">
+        <i class="fab fa-google"></i>
+        <span>Continue with Google</span>
+      </a>
+
+      <div class="login-info">
+        <p><i class="fas fa-shield-alt"></i> We use secure Google OAuth 2.0</p>
+        <p><i class="fas fa-lock"></i> No passwords to remember</p>
+        <p>
+          <i class="fas fa-user-circle"></i> Your profile info is kept private
+        </p>
+      </div>
+
+      <div class="login-features">
+        <h3>With SoulSight AI you can:</h3>
+        <ul>
+          <li>
+            <i class="fas fa-check-circle"></i> Upload & analyze unlimited
+            images
+          </li>
+          <li>
+            <i class="fas fa-check-circle"></i> Save your AI insights forever
+          </li>
+          <li><i class="fas fa-check-circle"></i> Access from any device</li>
+          <li>
+            <i class="fas fa-check-circle"></i> Export results as text or PDF
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="login-footer">
+      <p>
+        By continuing, you agree to our
+        <a href="{{ url_for('terms_of_service') }}">Terms</a> and
+        <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

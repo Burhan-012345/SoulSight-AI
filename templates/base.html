@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      {% block title %}SoulSight AI - See the Soul in Every Image{% endblock %}
+    </title>
+
+    <!-- Favicon - with fallback to default -->
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+      onerror="this.href='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👁️</text></svg>'"
+    />
+
+    <!-- Apple Touch Icon - optional -->
+    {% if url_for('static', filename='images/apple-touch-icon.png') %}
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ url_for('static', filename='images/apple-touch-icon.png') }}"
+    />
+    {% endif %}
+
+    <!-- Favicon PNGs - optional -->
+    {% if url_for('static', filename='images/favicon-32x32.png') %}
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', filename='images/favicon-32x32.png') }}"
+    />
+    {% endif %} {% if url_for('static', filename='images/favicon-16x16.png') %}
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{ url_for('static', filename='images/favicon-16x16.png') }}"
+    />
+    {% endif %}
+
+    <!-- Web Manifest - optional -->
+    {% if url_for('static', filename='images/site.webmanifest') %}
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='images/site.webmanifest') }}"
+    />
+    {% endif %}
+
+    <!-- Main CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+
+    <!-- Conditional CSS Loading -->
+    {% if request.endpoint and 'error' in request.endpoint %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/error.css') }}"
+    />
+    {% elif request.endpoint and request.endpoint in ['privacy_policy',
+    'terms_of_service', 'about'] %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/info.css') }}"
+    />
+    {% endif %} {% if request.endpoint == 'history' %}
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/history.css') }}"
+    />
+    {% endif %}
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Meta Tags for SEO -->
+    <meta
+      name="description"
+      content="SoulSight AI: Upload images and get emotionally rich, intelligent AI-generated text. Powered by Google Gemini Vision."
+    />
+    <meta
+      name="keywords"
+      content="AI, image analysis, Google Gemini, vision AI, emotional AI, image to text, AI storytelling"
+    />
+    <meta name="author" content="SoulSight AI" />
+    <meta
+      property="og:title"
+      content="SoulSight AI - See the Soul in Every Image"
+    />
+    <meta
+      property="og:description"
+      content="Upload images and get emotionally rich, intelligent AI-generated text."
+    />
+    <meta
+      property="og:image"
+      content="{{ url_for('static', filename='images/og-image.png', _external=True) }}"
+    />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Additional CSS blocks -->
+    {% block extra_css %}{% endblock %}
+
+    <!-- Inline CSS for critical loading -->
+    <style>
+      /* Critical CSS for initial load */
+      .loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+      }
+
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+
+      .loading-text {
+        color: white;
+        font-family: "Poppins", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Skip to content link - hidden by default */
+      .skip-to-content {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: #667eea;
+        color: white;
+        padding: 8px;
+        z-index: 10000;
+        text-decoration: none;
+      }
+
+      .skip-to-content:focus {
+        top: 0;
+      }
+
+      /* Default avatar fallback */
+      .default-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body
+    class="{% if request.endpoint and 'error' in request.endpoint %}error-page{% endif %}"
+  >
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading SoulSight AI...</div>
+    </div>
+
+    <!-- Skip to main content link for accessibility -->
+    <a href="#main-content" class="skip-to-content">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main Navigation">
+      <div class="nav-container">
+        <!-- Logo -->
+        <a
+          href="{{ url_for('index') }}"
+          class="logo"
+          aria-label="SoulSight AI Home"
+        >
+          <i class="fas fa-eye" aria-hidden="true"></i>
+          <span>SoulSight AI</span>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button
+          class="mobile-menu-toggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+        >
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Navigation Links -->
+        <div class="nav-links" id="navLinks">
+          {% if current_user.is_authenticated %}
+          <a
+            href="{{ url_for('dashboard') }}"
+            class="nav-link"
+            aria-label="Dashboard"
+          >
+            <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+            <span>Dashboard</span>
+          </a>
+
+          {% if current_user.is_admin %}
+          <a
+            href="{{ url_for('admin_dashboard') }}"
+            class="nav-link admin-link"
+            aria-label="Admin Dashboard"
+          >
+            <i class="fas fa-crown" aria-hidden="true"></i>
+            <span>Admin</span>
+          </a>
+          {% endif %}
+
+          <!-- User Menu -->
+          <div class="user-menu-container">
+            <button
+              class="user-menu-toggle"
+              aria-label="User menu"
+              aria-expanded="false"
+            >
+              {% if current_user.profile_pic %}
+              <img
+                src="{{ current_user.profile_pic }}"
+                alt="{{ current_user.name }}'s profile picture"
+                class="user-avatar"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+              />
+              <div class="default-avatar" style="display: none">
+                {{ current_user.name[0] if current_user.name else 'U' }}
+              </div>
+              {% else %}
+              <div class="default-avatar">
+                {{ current_user.name[0] if current_user.name else 'U' }}
+              </div>
+              {% endif %}
+              <span class="user-name"
+                >{{ current_user.name.split(' ')[0] if current_user.name else
+                'User' }}</span
+              >
+              <i class="fas fa-chevron-down" aria-hidden="true"></i>
+            </button>
+
+            <div class="user-dropdown" aria-label="User dropdown menu">
+              <div class="user-info">
+                {% if current_user.profile_pic %}
+                <img
+                  src="{{ current_user.profile_pic }}"
+                  alt="{{ current_user.name }}'s profile picture"
+                  class="dropdown-avatar"
+                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'"
+                />
+                <div class="default-avatar" style="display: none">
+                  {{ current_user.name[0] if current_user.name else 'U' }}
+                </div>
+                {% else %}
+                <div class="default-avatar">
+                  {{ current_user.name[0] if current_user.name else 'U' }}
+                </div>
+                {% endif %}
+                <div class="user-details">
+                  <strong>{{ current_user.name or 'User' }}</strong>
+                  <small>{{ current_user.email or '' }}</small>
+                </div>
+              </div>
+
+              <div class="dropdown-divider"></div>
+
+              <a href="{{ url_for('dashboard') }}" class="dropdown-item">
+                <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                Dashboard
+              </a>
+
+              <a
+                href="{{ url_for('dashboard') }}#favorites"
+                class="dropdown-item"
+              >
+                <i class="fas fa-star" aria-hidden="true"></i>
+                Favorites
+              </a>
+
+              <div class="dropdown-divider"></div>
+
+              <a href="{{ url_for('about') }}" class="dropdown-item">
+                <i class="fas fa-info-circle" aria-hidden="true"></i>
+                About
+              </a>
+
+              <a href="{{ url_for('privacy_policy') }}" class="dropdown-item">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                Privacy
+              </a>
+
+              <a href="{{ url_for('terms_of_service') }}" class="dropdown-item">
+                <i class="fas fa-file-contract" aria-hidden="true"></i>
+                Terms
+              </a>
+
+              <div class="dropdown-divider"></div>
+
+              <a
+                href="{{ url_for('logout') }}"
+                class="dropdown-item logout-item"
+              >
+                <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                Logout
+              </a>
+            </div>
+          </div>
+
+          {% else %}
+          <!-- Public Navigation -->
+          <a href="{{ url_for('about') }}" class="nav-link">
+            <i class="fas fa-info-circle" aria-hidden="true"></i>
+            <span>About</span>
+          </a>
+
+          <a href="{{ url_for('privacy_policy') }}" class="nav-link">
+            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+            <span>Privacy</span>
+          </a>
+
+          <a href="{{ url_for('terms_of_service') }}" class="nav-link">
+            <i class="fas fa-file-contract" aria-hidden="true"></i>
+            <span>Terms</span>
+          </a>
+
+          <a href="{{ url_for('login') }}" class="btn-login nav-btn">
+            <i class="fab fa-google" aria-hidden="true"></i>
+            <span>Sign In</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <i
+            class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' if category == 'error' else 'info-circle' }}"
+          ></i>
+          <span>{{ message }}</span>
+          <button class="flash-close" aria-label="Close message">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <!-- Page Content -->
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+      <div class="footer-container">
+        <!-- Footer Top -->
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a href="{{ url_for('index') }}" class="footer-logo">
+              <i class="fas fa-eye"></i>
+              <span>SoulSight AI</span>
+            </a>
+            <p class="footer-tagline">
+              Seeing the soul in every image through artificial intelligence
+            </p>
+
+            <div class="social-links">
+              <a
+                href="https://twitter.com/soulsightai"
+                class="social-link"
+                aria-label="Twitter"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i class="fab fa-twitter"></i>
+              </a>
+              <a
+                href="https://github.com/soulsightai"
+                class="social-link"
+                aria-label="GitHub"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i class="fab fa-github"></i>
+              </a>
+              <a
+                href="https://discord.gg/soulsight"
+                class="social-link"
+                aria-label="Discord"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i class="fab fa-discord"></i>
+              </a>
+              <a
+                href="https://linkedin.com/company/soulsightai"
+                class="social-link"
+                aria-label="LinkedIn"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i class="fab fa-linkedin"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="footer-links">
+            <div class="footer-column">
+              <h3 class="footer-heading">Product</h3>
+              <ul class="footer-list">
+                <li><a href="{{ url_for('index') }}">Features</a></li>
+                <li><a href="{{ url_for('index') }}">Pricing</a></li>
+                <li><a href="#">API</a></li>
+                <li><a href="#">Status</a></li>
+              </ul>
+            </div>
+
+            <div class="footer-column">
+              <h3 class="footer-heading">Company</h3>
+              <ul class="footer-list">
+                <li><a href="{{ url_for('about') }}">About Us</a></li>
+                <li><a href="{{ url_for('about') }}">Our Team</a></li>
+                <li><a href="{{ url_for('about') }}">Contact</a></li>
+                <li><a href="#">Careers</a></li>
+              </ul>
+            </div>
+
+            <div class="footer-column">
+              <h3 class="footer-heading">Legal</h3>
+              <ul class="footer-list">
+                <li>
+                  <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+                </li>
+                <li>
+                  <a href="{{ url_for('terms_of_service') }}"
+                    >Terms of Service</a
+                  >
+                </li>
+                <li><a href="#">Cookie Policy</a></li>
+                <li><a href="#">GDPR</a></li>
+              </ul>
+            </div>
+
+            <div class="footer-column">
+              <h3 class="footer-heading">Support</h3>
+              <ul class="footer-list">
+                <li><a href="mailto:support@soulsight.ai">Help Center</a></li>
+                <li>
+                  <a href="mailto:support@soulsight.ai">Contact Support</a>
+                </li>
+                <li><a href="#">Documentation</a></li>
+                <li><a href="#">Community</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="footer-bottom">
+          <div class="footer-copyright">
+            <p>
+              &copy; <span id="current-year">2024</span> SoulSight AI. All
+              rights reserved.
+            </p>
+            <p class="footer-ai-notice">
+              <i class="fas fa-robot"></i>
+              Powered by Google Gemini AI
+            </p>
+          </div>
+
+          <div class="footer-legal">
+            <a href="{{ url_for('privacy_policy') }}" class="legal-link"
+              >Privacy</a
+            >
+            <span class="legal-separator">•</span>
+            <a href="{{ url_for('terms_of_service') }}" class="legal-link"
+              >Terms</a
+            >
+            <span class="legal-separator">•</span>
+            <a href="#" class="legal-link">Cookies</a>
+            <span class="legal-separator">•</span>
+            <a href="#" class="legal-link" id="accessibility-toggle">
+              <i class="fas fa-universal-access"></i>
+              Accessibility
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" aria-label="Back to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Conditional JavaScript Loading -->
+    {% if request.endpoint and 'error' in request.endpoint %}
+    <script src="{{ url_for('static', filename='js/error.js') }}"></script>
+    {% elif request.endpoint and request.endpoint in ['privacy_policy',
+    'terms_of_service', 'about'] %}
+    <script src="{{ url_for('static', filename='js/info.js') }}"></script>
+    {% endif %}
+
+    <!-- Additional JavaScript blocks -->
+    {% block extra_js %}{% endblock %}
+
+    <!-- Inline JavaScript for critical functionality -->
+    <script>
+      // Remove loading screen when page is loaded
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          const loadingScreen = document.getElementById("loadingScreen");
+          if (loadingScreen) {
+            loadingScreen.style.opacity = "0";
+            setTimeout(function () {
+              loadingScreen.style.display = "none";
+            }, 500);
+          }
+        }, 300);
+      });
+
+      // Set current year in footer
+      document.getElementById("current-year").textContent =
+        new Date().getFullYear();
+
+      // Initialize theme based on preference
+      function initializeTheme() {
+        const savedTheme = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+
+      initializeTheme();
+    </script>
+  </body>
+</html>

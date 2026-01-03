@@ -1,0 +1,80 @@
+{% extends "base.html" %} {% block title %}Home - SoulSight AI{% endblock %} {%
+block content %}
+<div class="hero">
+  <div class="hero-content">
+    <h1>See the <span class="highlight">Soul</span> in Every Image</h1>
+    <p class="subtitle">
+      Upload any image and let AI reveal its emotional essence, hidden stories,
+      and profound insights.
+    </p>
+
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('login') }}" class="btn-hero">
+      <i class="fab fa-google"></i> Continue with Google to Begin
+    </a>
+    {% else %}
+    <a href="{{ url_for('dashboard') }}" class="btn-hero">
+      <i class="fas fa-magic"></i> Go to Dashboard
+    </a>
+    {% endif %}
+  </div>
+  <div class="hero-image">
+    <div class="image-preview">
+      <i class="fas fa-image"></i>
+      <p>Your image preview will appear here</p>
+    </div>
+    <div class="ai-output">
+      <i class="fas fa-brain"></i>
+      <p>AI insights will appear here</p>
+    </div>
+  </div>
+</div>
+
+<div class="features">
+  <h2>Unleash the Power of AI Vision</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <i class="fas fa-upload"></i>
+      <h3>Smart Upload</h3>
+      <p>
+        Drag & drop images for instant analysis with automatic category
+        detection.
+      </p>
+    </div>
+    <div class="feature-card">
+      <i class="fas fa-robot"></i>
+      <h3>Gemini AI</h3>
+      <p>
+        Powered by Google's latest Gemini Vision model for deep image
+        understanding.
+      </p>
+    </div>
+    <div class="feature-card">
+      <i class="fas fa-language"></i>
+      <h3>Multi-Language</h3>
+      <p>
+        Generate insights in English, Hindi, or Urdu with customizable tones.
+      </p>
+    </div>
+    <div class="feature-card">
+      <i class="fas fa-history"></i>
+      <h3>History & Favorites</h3>
+      <p>Save, revisit, and favorite your AI-generated insights anytime.</p>
+    </div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <h2>Ready to Discover Hidden Stories?</h2>
+  <p>Join thousands who have uncovered the emotional depth of their images.</p>
+  {% if not current_user.is_authenticated %}
+  <a href="{{ url_for('login') }}" class="btn-cta">
+    <i class="fab fa-google"></i> Start Free with Google
+  </a>
+  {% else %}
+  <a href="{{ url_for('dashboard') }}" class="btn-cta">
+    <i class="fas fa-play-circle"></i> Continue Your Journey
+  </a>
+  {% endif %}
+</div>
+{% endblock %}
