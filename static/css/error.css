@@ -1,0 +1,1073 @@
+/* 
+ * SoulSight AI - Error Pages Styles
+ * Error Pages: 400, 401, 403, 404, 405, 408, 429, 500, 503
+ */
+
+/* ============================================
+   VARIABLES & RESETS
+============================================ */
+:root {
+  /* Error-specific colors */
+  --error-primary: #667eea;
+  --error-secondary: #764ba2;
+  --error-accent: #f687b3;
+  --error-danger: #f56565;
+  --error-warning: #ed8936;
+  --error-success: #48bb78;
+  --error-info: #4299e1;
+
+  /* Error text colors */
+  --error-text: #2d3748;
+  --error-text-light: #718096;
+  --error-text-lighter: #a0aec0;
+
+  /* Backgrounds */
+  --error-bg: #f7fafc;
+  --error-card-bg: #ffffff;
+  --error-border: #e2e8f0;
+  --error-hover-bg: #f8f9fa;
+
+  /* Shadows */
+  --error-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --error-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --error-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+
+  /* Gradients */
+  --error-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --error-gradient-light: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1) 0%,
+    rgba(118, 75, 162, 0.1) 100%
+  );
+  --error-gradient-warning: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+
+  /* Spacing */
+  --error-radius: 12px;
+  --error-radius-sm: 8px;
+  --error-radius-lg: 16px;
+
+  /* Transitions */
+  --error-transition: all 0.3s ease;
+}
+
+/* ============================================
+   BASE ERROR LAYOUT
+============================================ */
+.error-container {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--error-bg);
+  background-image: radial-gradient(
+      circle at 10% 20%,
+      rgba(102, 126, 234, 0.05) 0%,
+      transparent 20%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      rgba(118, 75, 162, 0.05) 0%,
+      transparent 20%
+    );
+  animation: errorBackgroundPulse 20s ease-in-out infinite;
+}
+
+@keyframes errorBackgroundPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.error-card {
+  background: var(--error-card-bg);
+  border-radius: var(--error-radius-lg);
+  padding: 3.5rem;
+  text-align: center;
+  box-shadow: var(--error-shadow-xl);
+  max-width: 850px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--error-border);
+  animation: errorCardEntrance 0.6s ease-out;
+}
+
+@keyframes errorCardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.error-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--error-gradient);
+  border-radius: var(--error-radius-lg) var(--error-radius-lg) 0 0;
+}
+
+/* ============================================
+   ERROR HEADER & ICONS
+============================================ */
+.error-header {
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+.error-icon {
+  font-size: 5.5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  position: relative;
+  animation: errorIconFloat 3s ease-in-out infinite;
+}
+
+@keyframes errorIconFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.error-icon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: var(--error-gradient-light);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* Specific error icons */
+.error-400 .error-icon {
+  color: var(--error-warning);
+}
+.error-401 .error-icon {
+  color: var(--error-info);
+}
+.error-403 .error-icon {
+  color: var(--error-danger);
+}
+.error-404 .error-icon {
+  color: var(--error-primary);
+}
+.error-405 .error-icon {
+  color: var(--error-text-light);
+}
+.error-408 .error-icon {
+  color: #f6ad55;
+}
+.error-429 .error-icon {
+  color: #d69e2e;
+}
+.error-500 .error-icon {
+  color: var(--error-danger);
+}
+.error-503 .error-icon {
+  color: #a0aec0;
+}
+
+.error-code {
+  font-size: 6rem;
+  font-weight: 800;
+  margin: 0;
+  line-height: 1;
+  background: var(--error-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-family: "Playfair Display", serif;
+  position: relative;
+  display: inline-block;
+}
+
+.error-code::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--error-primary),
+    transparent
+  );
+  border-radius: 2px;
+}
+
+.error-title {
+  font-size: 2.2rem;
+  margin-top: 0.5rem;
+  color: var(--error-text);
+  font-weight: 600;
+  font-family: "Playfair Display", serif;
+}
+
+/* ============================================
+   ERROR CONTENT & DESCRIPTION
+============================================ */
+.error-content {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.error-description {
+  margin: 2rem 0;
+  text-align: center;
+  color: var(--error-text-light);
+  font-size: 1.15rem;
+  line-height: 1.8;
+}
+
+.error-description p {
+  margin-bottom: 1.5rem;
+}
+
+.error-details {
+  font-weight: 600;
+  color: var(--error-text);
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* Error Lists */
+.error-list {
+  text-align: left;
+  margin: 1.5rem auto;
+  padding-left: 1.5rem;
+  max-width: 600px;
+  background: var(--error-gradient-light);
+  padding: 1.5rem 1.5rem 1.5rem 2.5rem;
+  border-radius: var(--error-radius);
+  border-left: 4px solid var(--error-primary);
+}
+
+.error-list li {
+  margin-bottom: 0.75rem;
+  color: var(--error-text-light);
+  position: relative;
+  padding-left: 0.5rem;
+}
+
+.error-list li::before {
+  content: "•";
+  color: var(--error-primary);
+  font-weight: bold;
+  position: absolute;
+  left: -1rem;
+}
+
+/* Technical Information */
+.error-technical {
+  background: var(--error-hover-bg);
+  padding: 1.5rem;
+  border-radius: var(--error-radius);
+  margin: 1.5rem 0;
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 0.9rem;
+  text-align: left;
+  border: 1px solid var(--error-border);
+}
+
+.error-technical p {
+  margin: 0.5rem 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.error-technical strong {
+  min-width: 160px;
+  color: var(--error-text);
+}
+
+/* ============================================
+   ERROR ACTIONS & BUTTONS
+============================================ */
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2.5rem 0;
+  flex-wrap: wrap;
+}
+
+.error-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: var(--error-radius);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: var(--error-transition);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.error-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.error-btn:hover::before {
+  left: 100%;
+}
+
+.error-btn-primary {
+  background: var(--error-gradient);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.error-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.error-btn-secondary {
+  background: white;
+  color: var(--error-text);
+  border: 2px solid var(--error-border);
+}
+
+.error-btn-secondary:hover {
+  background: var(--error-hover-bg);
+  transform: translateY(-3px);
+  border-color: var(--error-primary);
+  color: var(--error-primary);
+}
+
+.error-btn-icon {
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   ERROR SEARCH (404 PAGE)
+============================================ */
+.error-search {
+  margin: 2.5rem auto;
+  max-width: 500px;
+}
+
+.error-search p {
+  margin-bottom: 1rem;
+  color: var(--error-text-light);
+}
+
+.search-container {
+  display: flex;
+  gap: 0;
+  background: white;
+  border-radius: var(--error-radius);
+  overflow: hidden;
+  box-shadow: var(--error-shadow);
+  border: 1px solid var(--error-border);
+  transition: var(--error-transition);
+}
+
+.search-container:focus-within {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--error-primary);
+}
+
+.search-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  font-size: 1rem;
+  color: var(--error-text);
+  background: transparent;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--error-text-lighter);
+}
+
+.search-button {
+  background: var(--error-primary);
+  color: white;
+  border: none;
+  padding: 0 1.8rem;
+  cursor: pointer;
+  transition: var(--error-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-button:hover {
+  background: var(--error-secondary);
+}
+
+.search-button i {
+  font-size: 1.2rem;
+}
+
+/* ============================================
+   ERROR SUGGESTIONS & POPULAR PAGES
+============================================ */
+.error-suggestions {
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: var(--error-gradient-light);
+  border-radius: var(--error-radius);
+  border: 1px solid var(--error-border);
+}
+
+.error-suggestions h3 {
+  color: var(--error-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-family: "Playfair Display", serif;
+}
+
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.suggestion-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 1rem;
+  background: white;
+  border-radius: var(--error-radius-sm);
+  text-decoration: none;
+  color: var(--error-text);
+  transition: var(--error-transition);
+  border: 1px solid transparent;
+}
+
+.suggestion-link:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--error-shadow-lg);
+  border-color: var(--error-primary);
+  color: var(--error-primary);
+}
+
+.suggestion-link i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--error-primary);
+  transition: var(--error-transition);
+}
+
+.suggestion-link:hover i {
+  transform: scale(1.1);
+}
+
+.suggestion-link span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ============================================
+   RATE LIMIT SPECIFIC (429 PAGE)
+============================================ */
+.rate-limit-section {
+  background: linear-gradient(135deg, #fffaf0 0%, #feebc8 100%);
+  border: 2px solid #f6ad55;
+  border-radius: var(--error-radius);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 600px;
+}
+
+.rate-limit-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #d69e2e;
+}
+
+.rate-limit-header i {
+  font-size: 2rem;
+}
+
+.rate-limit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.rate-limit-item {
+  background: white;
+  padding: 1rem;
+  border-radius: var(--error-radius-sm);
+  border-left: 4px solid #f6ad55;
+}
+
+.rate-limit-item strong {
+  color: var(--error-text);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.rate-limit-item span {
+  color: var(--error-text-light);
+  font-size: 0.9rem;
+}
+
+/* Countdown Timer */
+.countdown-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+.countdown-number {
+  background: var(--error-danger);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  animation: countdownPulse 1s infinite;
+}
+
+@keyframes countdownPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ============================================
+   SERVICE STATUS (500 & 503 PAGES)
+============================================ */
+.error-status {
+  margin: 2.5rem 0;
+}
+
+.error-status h3 {
+  color: var(--error-primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.2rem;
+  background: white;
+  border-radius: var(--error-radius-sm);
+  border: 1px solid var(--error-border);
+  transition: var(--error-transition);
+}
+
+.status-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--error-shadow);
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-dot::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+.status-up {
+  background: var(--error-success);
+}
+
+.status-up::after {
+  background: var(--error-success);
+}
+
+.status-down {
+  background: var(--error-danger);
+}
+
+.status-down::after {
+  background: var(--error-danger);
+}
+
+.status-degraded {
+  background: var(--error-warning);
+}
+
+.status-degraded::after {
+  background: var(--error-warning);
+}
+
+.status-text {
+  font-weight: 500;
+  color: var(--error-text);
+}
+
+/* ============================================
+   MAINTENANCE UPDATES (503 PAGE)
+============================================ */
+.maintenance-updates {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: var(--error-radius);
+  padding: 2rem;
+  margin: 2rem 0;
+  border: 1px solid var(--error-border);
+}
+
+.maintenance-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--error-primary);
+}
+
+.maintenance-header i {
+  font-size: 1.8rem;
+}
+
+.updates-timeline {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.updates-timeline::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--error-border);
+}
+
+.update-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.update-item:last-child {
+  padding-bottom: 0;
+}
+
+.update-dot {
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--error-primary);
+  border: 3px solid white;
+  box-shadow: 0 0 0 3px var(--error-primary);
+}
+
+.update-content {
+  background: white;
+  padding: 1.2rem;
+  border-radius: var(--error-radius-sm);
+  border: 1px solid var(--error-border);
+}
+
+.update-time {
+  color: var(--error-primary);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.update-text {
+  color: var(--error-text-light);
+  line-height: 1.6;
+}
+
+/* ============================================
+   ERROR HELP & FOOTER
+============================================ */
+.error-help {
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--error-border);
+  color: var(--error-text-light);
+  text-align: center;
+}
+
+.error-help p {
+  margin-bottom: 0.75rem;
+}
+
+.error-help a {
+  color: var(--error-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--error-transition);
+}
+
+.error-help a:hover {
+  color: var(--error-secondary);
+  text-decoration: underline;
+}
+
+.error-id {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: var(--error-hover-bg);
+  border-radius: var(--error-radius-sm);
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 0.9rem;
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+/* ============================================
+   ERROR TIPS & SOLUTIONS
+============================================ */
+.error-tips {
+  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+  border: 1px solid #81e6d9;
+  border-radius: var(--error-radius);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 700px;
+}
+
+.error-tips-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  color: #319795;
+}
+
+.error-tips-header i {
+  font-size: 1.8rem;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: var(--error-radius-sm);
+}
+
+.tip-item i {
+  color: #319795;
+  font-size: 1.2rem;
+  margin-top: 0.2rem;
+}
+
+.tip-text {
+  color: var(--error-text-light);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+============================================ */
+@media (max-width: 768px) {
+  .error-container {
+    padding: 1rem;
+  }
+
+  .error-card {
+    padding: 2rem 1.5rem;
+    margin: 1rem;
+  }
+
+  .error-code {
+    font-size: 4.5rem;
+  }
+
+  .error-title {
+    font-size: 1.8rem;
+  }
+
+  .error-icon {
+    font-size: 4rem;
+  }
+
+  .error-icon::after {
+    width: 100px;
+    height: 100px;
+  }
+
+  .error-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .error-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .suggestions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .rate-limit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tips-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-card {
+    padding: 1.5rem 1rem;
+  }
+
+  .error-code {
+    font-size: 3.5rem;
+  }
+
+  .error-title {
+    font-size: 1.5rem;
+  }
+
+  .suggestions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-container {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .search-button {
+    padding: 0.75rem;
+  }
+}
+
+/* ============================================
+   ANIMATIONS & EFFECTS
+============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.error-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--error-gradient-light) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--error-gradient-light) 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Loading dots for 408 page */
+.loading-dots {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--error-primary);
+  animation: loadingDot 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes loadingDot {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   DARK MODE SUPPORT
+============================================ */
+@media (prefers-color-scheme: dark) {
+  .error-container {
+    background: #1a202c;
+    background-image: radial-gradient(
+        circle at 10% 20%,
+        rgba(102, 126, 234, 0.1) 0%,
+        transparent 20%
+      ),
+      radial-gradient(
+        circle at 90% 80%,
+        rgba(118, 75, 162, 0.1) 0%,
+        transparent 20%
+      );
+  }
+
+  .error-card {
+    background: #2d3748;
+    border-color: #4a5568;
+  }
+
+  .error-title {
+    color: #e2e8f0;
+  }
+
+  .error-description,
+  .error-list li {
+    color: #a0aec0;
+  }
+
+  .error-btn-secondary {
+    background: #4a5568;
+    color: #e2e8f0;
+    border-color: #718096;
+  }
+
+  .error-btn-secondary:hover {
+    background: #5a67d8;
+    color: white;
+  }
+
+  .search-container {
+    background: #4a5568;
+    border-color: #718096;
+  }
+
+  .search-input {
+    color: #e2e8f0;
+    background: transparent;
+  }
+
+  .suggestion-link {
+    background: #4a5568;
+    color: #e2e8f0;
+  }
+
+  .rate-limit-section {
+    background: #4a5568;
+    border-color: #f6ad55;
+  }
+
+  .rate-limit-item {
+    background: #2d3748;
+  }
+
+  .error-tips {
+    background: #2d3748;
+    border-color: #319795;
+  }
+
+  .tip-item {
+    background: #4a5568;
+  }
+
+  .error-technical {
+    background: #4a5568;
+    border-color: #718096;
+    color: #cbd5e0;
+  }
+
+  .error-id {
+    background: #4a5568;
+    border-color: #718096;
+    color: #cbd5e0;
+  }
+}
